@@ -1,0 +1,281 @@
+namespace Robot_Arm_Application
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+        private void btnDiscoverAndConnect_Click(object sender, EventArgs e)
+        {
+            // Button click event handler
+            DiscoverAndConnectBluetoothDevice();
+        }
+
+        private void DiscoverAndConnectBluetoothDevice()
+        {
+            BluetoothClient bluetoothClient = new BluetoothClient();
+
+            // Discover nearby Bluetooth devices
+            BluetoothDeviceInfo[] devices = bluetoothClient.DiscoverDevices();
+
+            // Find the HC-05 device based off its name
+            string hc05DeviceName = "HC-05";
+            BluetoothDeviceInfo hc05Device = devices.FirstOrDefault(d => d.DeviceName == hc05DeviceName);
+
+            if (hc05Device != null)
+            {
+                try
+                {
+                    // Attempt to connect to the HC-05 device
+                    BluetoothClient client = new BluetoothClient();
+                    client.Connect(hc05Device.DeviceAddress, BluetoothService.SerialPort);
+
+                    // Connection successful, displays connection message
+                    MessageBox.Show("Bluetooth connection successful!");
+                }
+                catch (Exception ex)
+                {
+                    // Handle connection errors 
+                    MessageBox.Show($"Bluetooth connection failed: {ex.Message}");
+                }
+            }
+            else
+            {
+                // Handle if HC-05 device not found during discovery
+                MessageBox.Show("HC-05 device not found.");
+            }
+        }
+
+        private List<ServoStepperAction> recordedActions = new List<ServoStepperAction>();
+        private DateTime startTime;
+        private bool isRecording = false;
+
+        public class ServoStepperAction
+        {
+            public int ServoStepperNumber { get; set; }
+            public int PositionOrStepCount { get; set; }
+            public DateTime Timestamp { get; set; }
+            public bool IsStepperMotor { get; set; } // Add a property to identify stepper motor
+
+
+            public override string ToString()
+            {
+                // Override ToString method to display meaningful information in ComboBox
+                return $"Servo/Stepper: {ServoStepperNumber}, Position/Step: {PositionOrStepCount}, Timestamp: {Timestamp}";
+            }
+        }
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Handle the selected action from the ComboBox
+            if (comboBox1.SelectedItem != null)
+            {
+                // Cast the selected item to ServoStepperAction and send the action to the Arduino
+                ServoStepperAction selectedAction = (ServoStepperAction)comboBox1.SelectedItem;
+                SendActionToArduino(selectedAction);
+            }
+        }
+
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+            if (isRecording)
+            {
+                // Stop recording actions
+                isRecording = false;
+                SaveButton.Text = "Record Action";
+
+                // Save the recorded actions to ComboBox
+                if (recordedActions.Count > 0)
+                {
+                    // Filter and add recorded actions within the last 30 seconds to the ComboBox
+                    recordedActions = recordedActions
+                        .Where(action => (DateTime.Now - action.Timestamp) <= TimeSpan.FromSeconds(30))
+                        .ToList();
+
+                    // Add recorded actions to ComboBox
+                    comboBox1.Items.AddRange(recordedActions.ToArray());
+                }
+
+                // Clear the recordedActions list for the next recording session
+                recordedActions.Clear();
+            }
+            else
+            {
+                // Start recording actions
+                isRecording = true;
+                SaveButton.Text = "Stop Recording";
+
+                // Set the start time for the recording
+                startTime = DateTime.Now;
+            }
+        }
+        private void SendActionToArduino(ServoStepperAction action)
+        {
+            // Get the Bluetooth address of the HC-05 device
+            string hc05DeviceAddress = "98:da:50:02:48:a3";
+
+            // Create a Bluetooth client and connect to the HC-05 device
+            BluetoothClient bluetoothClient = new BluetoothClient();
+            BluetoothDeviceInfo hc05Device = new BluetoothDeviceInfo(BluetoothAddress.Parse(hc05DeviceAddress));
+            bluetoothClient.Connect(hc05Device.DeviceAddress, BluetoothService.SerialPort);
+
+            // Get the Bluetooth stream for communication
+            Stream bluetoothStream = bluetoothClient.GetStream();
+
+            // Convert the action to bytes and send the data to the Arduino
+            byte[] dataBytes;
+            string dataToSend;
+
+            if (action.IsStepperMotor)
+            {
+                // For stepper motor, use the "T=X;" format
+                dataToSend = $"T={action.PositionOrStepCount};";
+                dataBytes = Encoding.ASCII.GetBytes(dataToSend);
+            }
+            else
+            {
+                // For servo motors, use the "S1=X;", "S2=X;", ..., "S6=X;" format
+                string servoCommand = $"S{action.ServoStepperNumber}={action.PositionOrStepCount};";
+                dataToSend = servoCommand;
+                dataBytes = Encoding.ASCII.GetBytes(dataToSend);
+            }
+
+            bluetoothStream.Write(dataBytes, 0, dataBytes.Length);
+
+            // Close the stream and disconnect the Bluetooth client
+            bluetoothStream.Close();
+            bluetoothClient.Close();
+
+            // Display a message to indicate the action is sent (optional)
+            MessageBox.Show($"Action sent to Arduino: {dataToSend}");
+        }
+
+        private void trackBar1_ValueChanged(object sender, EventArgs e)
+        {
+            // Update the servo position based on the trackbar value
+            int servo1Position = trackBar1.Value;
+            string servo1Command = $"S1={servo1Position};";
+
+            // Create a new ServoStepperAction and add it to the recordedActions list
+            ServoStepperAction servoAction = new ServoStepperAction
+            {
+                ServoStepperNumber = 1, 
+                PositionOrStepCount = servo1Position,
+                Timestamp = DateTime.Now
+            };
+            recordedActions.Add(servoAction);
+
+            // Send the servo command to the Arduino
+            SendActionToArduino(servoAction);
+        }
+
+        private void trackBar2_ValueChanged(object sender, EventArgs e)
+        {
+            // Update the servo position based on the trackbar value
+            int servo2Position = trackBar2.Value;
+            string servo2Command = $"S2={servo2Position};";
+
+            ServoStepperAction servoAction = new ServoStepperAction
+            {
+                ServoStepperNumber = 2, 
+                PositionOrStepCount = servo2Position,
+                Timestamp = DateTime.Now
+            };
+            recordedActions.Add(servoAction);
+
+            // Send the servo command to the Arduino
+            SendActionToArduino(servoAction);
+        }
+
+        private void trackBar3_ValueChanged(object sender, EventArgs e)
+        {
+            // Update the servo position based on the trackbar value
+            int servo3Position = trackBar3.Value;
+            string servo3Command = $"S3={servo3Position};";
+
+            ServoStepperAction servoAction = new ServoStepperAction
+            {
+                ServoStepperNumber = 3,
+                PositionOrStepCount = servo3Position,
+                Timestamp = DateTime.Now
+            };
+            recordedActions.Add(servoAction);
+
+            // Send the servo command to the Arduino
+            SendActionToArduino(servoAction);
+        }
+
+        private void trackBar4_ValueChanged(object sender, EventArgs e)
+        {
+            // Update the servo position based on the trackbar value
+            int servo4Position = trackBar4.Value;
+            string servo4Command = $"S4={servo4Position};";
+
+            ServoStepperAction servoAction = new ServoStepperAction
+            {
+                ServoStepperNumber = 4,
+                PositionOrStepCount = servo4Position,
+                Timestamp = DateTime.Now
+            };
+            recordedActions.Add(servoAction);
+
+            // Send the servo command to the Arduino
+            SendActionToArduino(servoAction);
+        }
+
+        private void trackBar5_ValueChanged(object sender, EventArgs e)
+        {
+            // Update the servo position based on the trackbar value
+            int servo5Position = trackBar5.Value;
+            string servo5Command = $"S5={servo5Position};";
+
+            ServoStepperAction servoAction = new ServoStepperAction
+            {
+                ServoStepperNumber = 5,
+                PositionOrStepCount = servo5Position,
+                Timestamp = DateTime.Now
+            };
+            recordedActions.Add(servoAction);
+
+            // Send the servo command to the Arduino
+            SendActionToArduino(servoAction);
+        }
+
+        private void trackBar6_ValueChanged(object sender, EventArgs e)
+        {
+            // Update the servo position based on the trackbar value
+            int servo6Position = trackBar6.Value;
+            string servo6Command = $"S6={servo6Position};";
+
+            ServoStepperAction servoAction = new ServoStepperAction
+            {
+                ServoStepperNumber = 6,
+                PositionOrStepCount = servo6Position,
+                Timestamp = DateTime.Now
+            };
+            recordedActions.Add(servoAction);
+
+            // Send the servo command to the Arduino
+            SendActionToArduino(servoAction);
+        }
+
+        private void trackBar7_ValueChanged(object sender, EventArgs e)
+        {
+            // Assuming trackBar7's Minimum and Maximum properties are set appropriately
+            int steps = trackBar7.Value; // Get the number of steps from the track bar
+
+            // Create a new ServoStepperAction instance for the stepper motor
+            ServoStepperAction stepperAction = new ServoStepperAction
+            {
+                ServoStepperNumber = 7, // Use 7 to identify the stepper motor
+                PositionOrStepCount = steps,
+                Timestamp = DateTime.Now,
+                IsStepperMotor = true // Set the IsStepperMotor flag to true
+            };
+
+            // Send the stepper motor action to the Arduino
+            SendActionToArduino(stepperAction);
+        }
+    }
+}
+
