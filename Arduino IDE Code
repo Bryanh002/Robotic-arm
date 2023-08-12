@@ -117,8 +117,63 @@ void parseAndSetAction(String data)
 
     // Process servo commands
     if (commandType == 'S')
-    {
-      // ... (Your servo command processing code)
+     {
+      int equalPos = segment.indexOf('=');
+      if (equalPos > 0)
+      {
+        String servoNumStr = segment.substring(1, equalPos);
+        String servoPosStr = segment.substring(equalPos + 1);
+
+        int servoNum = servoNumStr.toInt();
+        int servoPos = servoPosStr.toInt();
+
+        // Map servo position values if necessary
+        int servoPosition = 0; // Default position value in case of error
+
+        try
+        {
+          if (servoNum == 1)
+          {
+            servoPosition = map(servoPos, 0, 180, servo01_min_pos, servo01_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else if (servoNum == 2)
+          {
+            servoPosition = map(servoPos, 0, 180, servo02_min_pos, servo02_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else if (servoNum == 3)
+          {
+            servoPosition = map(servoPos, 0, 180, servo03_min_pos, servo03_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else if (servoNum == 4)
+          {
+            servoPosition = map(servoPos, 0, 180, servo04_min_pos, servo04_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else if (servoNum == 5)
+          {
+            servoPosition = map(servoPos, 0, 180, servo05_min_pos, servo05_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else if (servoNum == 6)
+          {
+            servoPosition = map(servoPos, 0, 180, servo06_min_pos, servo06_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else
+          {
+            // Handle invalid servo number here
+          }
+        }
+        catch (const std::exception &e)
+        {
+          // Handle the exception, for example, print the error message
+          Serial.print("Error occurred: ");
+          Serial.println(e.what());
+        }
+      }
     }
     // You can add other command types here for different devices if needed
   }
