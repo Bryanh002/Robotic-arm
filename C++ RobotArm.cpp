@@ -89,8 +89,6 @@ void loop()
     // Process the received data (e.g., parse and move the stepper motor)
     parseAndMoveStepper(dataIn);
   }
-
-  // Other loop code if needed
 }
 
 void parseAndSetAction(String data)
@@ -164,7 +162,6 @@ void parseAndSetAction(String data)
         }
       }
     }
-    // You can add other command types here for different devices if needed
   }
 }
 
