@@ -1,0 +1,183 @@
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+#include <SoftwareSerial.h>
+#include <AccelStepper.h>
+#include <Servo.h>
+
+// Define the connections to the A4988 driver
+const int stepPin = 3;
+const int dirPin = 4;
+const int stepsPerRevolution = 200; // Number of steps for a full 360-degree rotation
+
+// Create a stepper motor object
+AccelStepper stepper(AccelStepper::DRIVER, stepPin, dirPin);
+
+// Define the servo driver object
+#define I2CAdd 0x40
+Adafruit_PWMServoDriver pca9685 = Adafruit_PWMServoDriver(I2CAdd);
+
+// Set up Bluetooth based on pins in the Arduino UNO board. 0 = BluetoothTx, 1 = BluetoothRx
+SoftwareSerial Bluetooth(0, 1);
+
+// Degree of robot servo sensitivity - Intervals
+int servo01Pos_increment = 20;
+int servo02Pos_increment = 20;
+int servo03Pos_increment = 20;
+int servo04Pos_increment = 50;
+int servo05Pos_increment = 60;
+int servo06Pos_increment = 40;
+
+// Keep track of the current value of the motor positions
+int servo01Pos_i = 60;
+int servo02Pos_i = 60;
+int servo03Pos_i = 70;
+int servo04Pos_i = 47;
+int servo05Pos_i = 63;
+int servo06Pos_i = 63;
+
+// Minimum and maximum angle of servo motor
+int servo01_min_pos = 10;
+int servo01_max_pos = 180;
+
+int servo02_min_pos = 10;
+int servo02_max_pos = 180;
+
+int servo03_min_pos = 10;
+int servo03_max_pos = 180;
+
+int servo04_min_pos = 10;
+int servo04_max_pos = 180;
+
+int servo05_min_pos = 10;
+int servo05_max_pos = 180;
+
+int servo06_min_pos = 10;
+int servo06_max_pos = 180;
+
+void setup()
+{
+  // Initialize the PCA9685 servo driver
+  pca9685.begin();
+  pca9685.setOscillatorFrequency(27000000);
+  pca9685.setPWMFreq(50); // Set the frequency to 50 Hz
+
+  Serial.begin(9600); // Start serial communication
+  Bluetooth.begin(9600); // Start Bluetooth communication at 9600 baud
+
+  // Set up stepper motor settings
+  stepper.setMaxSpeed(1000);     // Set the maximum speed (adjust this value as needed)
+  stepper.setAcceleration(500);  // Set the acceleration (adjust this value as needed)
+
+  delay(3000);
+}
+
+void loop()
+{
+  // Check for incoming data from Bluetooth
+  if (Bluetooth.available() > 0)
+  {
+    // Read the data as a string
+    String dataIn = Bluetooth.readString();
+    // Process the received data (e.g., parse and set servo positions)
+    parseAndSetAction(dataIn);
+  }
+
+  // Check for incoming data from Serial (C# application) for the stepper motor
+  if (Serial.available() > 0)
+  {
+    String dataIn = Serial.readString();
+    // Process the received data (e.g., parse and move the stepper motor)
+    parseAndMoveStepper(dataIn);
+  }
+
+  // Other loop code if needed
+}
+
+void parseAndSetAction(String data)
+{
+  String segments[6]; // An array to store the segments (6 servos)
+
+  int numSegments = data.split(';', segments, 6); // Split data into segments based on ';'
+
+  // Process each segment to extract servo number and position value
+  for (int i = 0; i < numSegments; i++)
+  {
+    String segment = segments[i];
+    char commandType = segment.charAt(0);
+
+    if (commandType == 'S') // Servo command
+    {
+      int equalPos = segment.indexOf('=');
+      if (equalPos > 0)
+      {
+        String servoNumStr = segment.substring(1, equalPos);
+        String servoPosStr = segment.substring(equalPos + 1);
+
+        int servoNum = servoNumStr.toInt();
+        int servoPos = servoPosStr.toInt();
+
+        // Map servo position values if necessary
+        int servoPosition = 0; // Default position value in case of error
+
+        try
+        {
+          if (servoNum == 1)
+          {
+            servoPosition = map(servoPos, 0, 180, servo01_min_pos, servo01_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else if (servoNum == 2)
+          {
+            servoPosition = map(servoPos, 0, 180, servo02_min_pos, servo02_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else if (servoNum == 3)
+          {
+            servoPosition = map(servoPos, 0, 180, servo03_min_pos, servo03_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else if (servoNum == 4)
+          {
+            servoPosition = map(servoPos, 0, 180, servo04_min_pos, servo04_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else if (servoNum == 5)
+          {
+            servoPosition = map(servoPos, 0, 180, servo05_min_pos, servo05_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else if (servoNum == 6)
+          {
+            servoPosition = map(servoPos, 0, 180, servo06_min_pos, servo06_max_pos);
+            pca9685.setPWM(servoNum - 1, 0, servoPosition);
+          }
+          else
+          {
+            // Handle invalid servo number here
+          }
+        }
+        catch (const std::exception &e)
+        {
+          // Handle the exception, for example, print the error message
+          Serial.print("Error occurred: ");
+          Serial.println(e.what());
+        }
+      }
+    }
+    // You can add other command types here for different devices if needed
+  }
+}
+
+void parseAndMoveStepper(String data)
+{
+  if (data.charAt(0) == 'T') // Stepper command
+  {
+    int steps = data.substring(1).toInt(); // Read the step count from the data
+
+    // Move the stepper motor to the desired position (in steps)
+    stepper.moveTo(steps);
+
+    // Run the motor to the desired position
+    stepper.runToPosition();
+  }
+}
