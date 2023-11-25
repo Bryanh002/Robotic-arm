@@ -7,26 +7,26 @@ to make this project unique by adding an Internet of Things aspect. I used a Blu
 The entire robotic arm was 3D Printed except for the screws, bearings, and electronics needed to assemble it. Since I wanted to focus mainly on the electronic and coding design of the project I decided to use an online 3D model to base my Robotic arm off of.
 I first started by finding a suitable 3D model that I could use which I will link below. After that, I started 3D Printing the pieces, the 3D Printing took around 5 days for all the parts. I then could start assembling the robotic arm.
 
-<pre>Mechanical Parts:                                                             Electronic Parts:
-M3 x 8mm round head (34x)                                                     Arduino Uno R3
+<pre>Mechanical Parts:                                                          Electronic Parts:
+M3 x 8mm round head (34x)                                                  Arduino Uno R3
 
-M3 x 10mm round head(61x)                                                     A4988 Stepper Motor Driver
+M3 x 10mm round head(61x)                                                  A4988 Stepper Motor Driver
 
-M3 x 10mm countersunk (1x)                                                    PCA9685 PWM Servo Driver
+M3 x 10mm countersunk (1x)                                                 PCA9685 PWM Servo Driver
 
-M3 x 25mm round head(2x)                                                      BB400 Solderless BreadBoard
+M3 x 25mm round head(2x)                                                   BB400 Solderless BreadBoard
 
-M3 x 16mm round head (4x)                                                     Jumper Wires
+M3 x 16mm round head (4x)                                                  Jumper Wires
 
-M3 nut (2x)                                                                   HC-05 Bluetooth Chip
+M3 nut (2x)                                                                HC-05 Bluetooth Chip
 
-10mm x 30mm x 9mm bearing, 6200zz (2x)                                        4.8V 2400mAh NiMH Battery
+10mm x 30mm x 9mm bearing, 6200zz (2x)                                     4.8V 2400mAh NiMH Battery
 
-8mm x 16mm x 5mm bearing, 688zz (3x)                                          11.1V 2200mAh 35C 3S LiPo Battery
+8mm x 16mm x 5mm bearing, 688zz (3x)                                       11.1V 2200mAh 35C 3S LiPo Battery
 
-8mm x 16mm x 5mm bearing, 688zz (2x)                                          6 MG996R Servor Motors
+8mm x 16mm x 5mm bearing, 688zz (2x)                                       6 MG996R Servor Motors
 
-10mm steel balls (10x)                                                        DC 4.0V 1.2A Stepper Motor
+10mm steel balls (10x)                                                     DC 4.0V 1.2A Stepper Motor
 
 M4 x 16mm round head(4x)
 </pre>
@@ -44,7 +44,7 @@ M4 x 16mm round head(4x)
 ### These images show the progression made from the claw to the first joint of the robotic arm:
 
 
-<image src="https://github.com/Bryanh002/Robotic-arm/assets/139603920/4f318afc-e834-4da9-b107-3b20a39063fd" width="275" height="400" align="top">
+<image src="https://github.com/Bryanh002/Robotic-arm/assets/139603920/4f318afc-e834-4da9-b107-3b20a39063fd" width="275" height="375" align="top">
 <image src="https://github.com/Bryanh002/Robotic-arm/assets/139603920/ccc58798-7d26-455c-949b-3f4e90435a09" width="500" height="400" align="right"> 
 
 <br><br><br><br>
