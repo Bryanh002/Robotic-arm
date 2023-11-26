@@ -32,7 +32,7 @@ M4 x 16mm round head(4x)
 </pre>
 
 <br><br><br>
-### Here are some photos of the 3D Model assembly:
+### Here are some photos of the 3D Model assemblies:
 
 <image src="https://github.com/Bryanh002/Robotic-arm/assets/139603920/b8f6eafc-d0d6-46d4-91ea-c5f621b200da" width="350" height="625" align="top" align="left">
 <image src="https://github.com/Bryanh002/Robotic-arm/assets/139603920/804deff8-dd3c-4b91-a91c-a836c73bb71d" width="350" height="650" align="right"> 
