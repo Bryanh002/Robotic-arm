@@ -74,8 +74,6 @@ In this repository are both coding files I used for this project. the Arduino Co
 The Windows application code was created using a Visual Studio Windows Form, the code essentially takes the input from the trackbars on the application and parses and converts it so that when its sent
 to the Arduino, it will understand what actions to take. I also included a function to save actions and replay them.
 
-### Windows Form:
-
 
 
 
