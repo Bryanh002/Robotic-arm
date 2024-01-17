@@ -74,7 +74,11 @@ In this repository are both coding files I used for this project. the Arduino Co
 The Windows application code was created using a Visual Studio Windows Form, the code essentially takes the input from the trackbars on the application and parses and converts it so that when its sent
 to the Arduino, it will understand what actions to take. I also included a function to save actions and replay them.
 
+Here is a snapshot of the Windows application I developed using Visual Studio to control the robotic arm: 
 
+<br>
+
+<image src="https://static.wixstatic.com/media/3f5fbe_c1aeab65328f44e1834d4ef73824c266~mv2.png/v1/fill/w_779,h_363,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Windows%20Application_PNG.png">
 
 
 
